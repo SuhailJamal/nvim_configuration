@@ -22,6 +22,49 @@ return {
             vim.lsp.protocol.make_client_capabilities(),
             cmp_lsp.default_capabilities())
 
+        -- LSP Keymaps
+        vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go to definition" })
+        vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { desc = "Show hover information" })
+        vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, { desc = "Search workspace symbols" })
+        vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, { desc = "Show diagnostics" })
+        vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, { desc = "Go to next diagnostic" })
+        vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, { desc = "Go to previous diagnostic" })
+        vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, { desc = "Show code actions" })
+        vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, { desc = "Show references" })
+        vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, { desc = "Rename symbol" })
+        vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, { desc = "Show signature help" })
+
+        -- Configure diagnostics display
+        vim.diagnostic.config({
+            virtual_text = true, -- Show errors inline
+            signs = true, -- Show signs in the gutter
+            update_in_insert = false, -- Don't update diagnostics in insert mode
+            underline = true, -- Underline errors
+            severity_sort = true, -- Sort diagnostics by severity
+            float = {
+                focusable = false,
+                style = "minimal",
+                border = "rounded",
+                source = "always",
+                header = "",
+                prefix = "",
+                format = function(diagnostic)
+                    return string.format(
+                        "%s (%s)",
+                        diagnostic.message,
+                        diagnostic.source
+                    )
+                end,
+            },
+        })
+
+        -- Change diagnostic symbols in the sign column
+        local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+        for type, icon in pairs(signs) do
+            local hl = "DiagnosticSign" .. type
+            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+        end
+
         require("fidget").setup({})
         require("mason").setup()
         require("mason-lspconfig").setup({
@@ -30,6 +73,7 @@ return {
                 "ts_ls",
                 "clangd",
                 "pyright",
+                "jdtls",
                 "html",
                 "cssls",
                 "jsonls",
@@ -72,7 +116,7 @@ return {
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
                 ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
+                ["<C-i>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
                 { name = 'nvim_lsp' },
