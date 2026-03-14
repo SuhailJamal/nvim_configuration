@@ -36,7 +36,7 @@ return {
 
         -- Configure diagnostics display
         vim.diagnostic.config({
-            virtual_text = true, -- Show errors inline
+            virtual_text = false, -- Disable virtual text by default for performance and less noise
             signs = true, -- Show signs in the gutter
             update_in_insert = false, -- Don't update diagnostics in insert mode
             underline = true, -- Underline errors

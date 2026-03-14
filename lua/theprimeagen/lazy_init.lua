@@ -13,7 +13,21 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
     spec = "theprimeagen.lazy",
-    change_detection = { notify = false }
+    change_detection = { notify = false },
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "gzip",
+                "matchit",
+                "matchparen",
+                "netrwPlugin",
+                "tarPlugin",
+                "tohtml",
+                "tutor",
+                "zipPlugin",
+            },
+        },
+    },
 })
 --[[
 require("lazy").setup({
