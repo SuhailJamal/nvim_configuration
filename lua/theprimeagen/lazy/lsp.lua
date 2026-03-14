@@ -78,11 +78,13 @@ return {
                 "cssls",
                 "jsonls",
                 "tailwindcss",
-
+                "spring_boot",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
-
+                    if server_name == "jdtls" then
+                        return
+                    end
                     require("lspconfig")[server_name].setup {
                         capabilities = capabilities
                     }
@@ -99,6 +101,12 @@ return {
                                 }
                             }
                         }
+                    }
+                end,
+
+                ["spring_boot"] = function()
+                    require("lspconfig").spring_boot.setup {
+                        capabilities = capabilities,
                     }
                 end,
             }

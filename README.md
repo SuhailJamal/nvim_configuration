@@ -33,6 +33,20 @@ This is a custom Neovim configuration using lazy.nvim for plugin management. It'
   - `<M-]>`: Next suggestion
   - `<M-[>`: Previous suggestion
 
+### ☕ Java & Spring Boot
+- **nvim-jdtls**: Enhanced Java development experience
+  - `<leader>jo`: Organize imports
+  - `<leader>jv`: Extract variable
+  - `<leader>jc`: Extract constant
+  - `<leader>jm`: Extract method (Visual mode)
+- **spring-boot-ls**: Spring Boot specific features (auto-completion for properties, beans, etc.)
+- **nvim-dap**: Debugging support for Java/Spring
+  - `<leader>db`: Toggle breakpoint
+  - `<leader>dc`: Start/Continue debugging
+  - `<leader>di`: Step into
+  - `<leader>do`: Step over
+  - `<leader>dt`: Terminate debugging
+
 ### 🛠️ Development Tools
 - **conform.nvim**: Auto-formatting
   - `<leader>f`: Format buffer (also happens on save)
