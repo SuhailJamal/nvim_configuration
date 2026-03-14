@@ -37,7 +37,14 @@ return {
         -- Configure diagnostics display
         vim.diagnostic.config({
             virtual_text = false, -- Disable virtual text by default for performance and less noise
-            signs = true, -- Show signs in the gutter
+            signs = {
+                text = {
+                    [vim.diagnostic.severity.ERROR] = " ",
+                    [vim.diagnostic.severity.WARN] = " ",
+                    [vim.diagnostic.severity.HINT] = " ",
+                    [vim.diagnostic.severity.INFO] = " ",
+                },
+            },
             update_in_insert = false, -- Don't update diagnostics in insert mode
             underline = true, -- Underline errors
             severity_sort = true, -- Sort diagnostics by severity
@@ -57,13 +64,6 @@ return {
                 end,
             },
         })
-
-        -- Change diagnostic symbols in the sign column
-        local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-        for type, icon in pairs(signs) do
-            local hl = "DiagnosticSign" .. type
-            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-        end
 
         require("fidget").setup({})
         require("mason").setup()
