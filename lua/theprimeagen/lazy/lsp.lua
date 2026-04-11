@@ -8,7 +8,12 @@ return {
         "hrsh7th/cmp-path",
         "hrsh7th/cmp-cmdline",
         "hrsh7th/nvim-cmp",
-        "L3MON4D3/LuaSnip",
+        {
+            "L3MON4D3/LuaSnip",
+            -- Remove build step that causes issues on Windows
+            build = nil,
+            version = "v2.*",
+        },
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
         "rafamadriz/friendly-snippets",
