@@ -27,7 +27,6 @@ return {
             yaml = { "prettier" },
             markdown = { "prettier" },
             graphql = { "prettier" },
-            java = { "google_java_format" },
             -- sh = { "shfmt" },
         },
         -- Set up format-on-save
