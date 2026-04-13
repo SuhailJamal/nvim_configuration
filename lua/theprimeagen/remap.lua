@@ -11,12 +11,7 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
-vim.keymap.set("n", "<leader>vwm", function()
-    require("vim-with-me").StartVimWithMe()
-end)
-vim.keymap.set("n", "<leader>svwm", function()
-    require("vim-with-me").StopVimWithMe()
-end)
+-- vim-with-me removed (plugin not installed)
 
 -- greatest remap ever
 vim.keymap.set("x", "<leader>p", [["_dP]])
@@ -31,16 +26,25 @@ vim.keymap.set({"n", "v"}, "<leader>d", [["_d]])
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
+-- tmux sessionizer (Linux/macOS only — tmux does not exist on Windows)
+if jit.os ~= "Windows" then
+    vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
+end
+-- <leader>f is handled by conform.nvim (formatting.lua)
+
+-- Quickfix navigation (<C-k>/<C-j> conflict with harpoon — use leader variants below)
+vim.keymap.set("n", "<leader>cn", "<cmd>cnext<CR>zz")
+vim.keymap.set("n", "<leader>cp", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+
+-- chmod: Unix only
+if jit.os ~= "Windows" then
+    vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+end
 
 vim.keymap.set(
     "n",
@@ -48,8 +52,10 @@ vim.keymap.set(
     "oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
 )
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
-vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
+-- Cross-platform path to the lazy init config
+vim.keymap.set("n", "<leader>vpp", function()
+    vim.cmd("e " .. vim.fn.stdpath("config") .. "/lua/theprimeagen/lazy_init.lua")
+end)
 
 vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("so")

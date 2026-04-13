@@ -1,104 +1,223 @@
-# Personal Neovim Configuration
+# Neovim Configuration
 
-This is a custom Neovim configuration using lazy.nvim for plugin management. It's designed to provide a modern IDE-like experience while maintaining Neovim's speed and efficiency.
+A minimal, fast Neovim setup built on [lazy.nvim](https://github.com/folke/lazy.nvim).
+Targets **Neovim 0.11+** (tested on v0.12.1).
+
+---
 
 ## 🚀 Features
 
-- **Modern Plugin Management**: Powered by [lazy.nvim](https://github.com/folke/lazy.nvim) with optimized RTP and lazy-loading.
-- **LSP Support**: Intelligent code completion and diagnostics via [lsp-zero.nvim](https://github.com/VonHeikemen/lsp-zero.nvim).
-- **Auto-Formatting**: Robust "format on save" using [conform.nvim](https://github.com/stevearc/conform.nvim).
-- **AI-Assisted Coding**: Integrated [Copilot.lua](https://github.com/zbirenbaum/copilot.lua) for smart suggestions.
-- **Session Management**: Automatically save and restore sessions with [persistence.nvim](https://github.com/folke/persistence.nvim).
-- **Syntax Highlighting**: Advanced parsing with [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter).
-- **Fuzzy Finding**: Powerful search and navigation with [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim).
-- **Git Integration**: Seamless Git workflow via [vim-fugitive](https://github.com/tpope/vim-fugitive).
-- **Security**: Sensitive data masking with [cloak.nvim](https://github.com/laytan/cloak.nvim).
+- **LSP** — mason-lspconfig v2 with 12 language servers auto-installed
+- **Completion** — nvim-cmp: LSP, snippets, buffer words, file paths, command mode
+- **Formatting** — conform.nvim with format-on-save for 15+ filetypes
+- **Syntax** — nvim-treesitter (main branch, native Neovim 0.11+ highlighting)
+- **Fuzzy finding** — telescope.nvim
+- **Git** — vim-fugitive
+- **Navigation** — harpoon2 for quick file switching
+- **Diagnostics** — trouble.nvim + fidget.nvim
+- **Refactoring** — refactoring.nvim (lazy-loaded)
+- **Snippets** — LuaSnip + friendly-snippets
 
-## ⚙️ Core Plugins and Their Functions
+---
 
-### 🔍 File Navigation & Search
-- **telescope.nvim**: Fuzzy finder and much more
-  - `<leader>ff`: Find files
-  - `<C-p>`: Git files
-  - `<leader>fs`: Grep search
-  - `<leader>vh`: Help tags
-  - `<leader>pws`: Search current word
+## 🌐 Language Support
 
-### 📝 LSP & Completion
-- **lsp-zero.nvim**: Easy LSP setup
-- **mason.nvim**: LSP package management
-- **nvim-cmp**: Completion engine
-- **Copilot.lua**: AI code completion
-  - `<M-l>`: Accept suggestion
-  - `<M-]>`: Next suggestion
-  - `<M-[>`: Previous suggestion
+| Language | LSP | Treesitter | Formatter |
+|---|:---:|:---:|:---:|
+| Lua | `lua_ls` | ✅ | `stylua` |
+| JavaScript | `ts_ls` | ✅ | `prettier` |
+| TypeScript | `ts_ls` | ✅ | `prettier` |
+| JSX / TSX | `ts_ls` | ✅ | `prettier` |
+| Python | `pyright` | ✅ | `isort` + `black` |
+| C / C++ | `clangd` | ✅ | `clang_format` |
+| Rust | `rust_analyzer` | ✅ | `rustfmt` |
+| HTML | `html` | ✅ | `prettier` |
+| CSS | `cssls` | ✅ | `prettier` |
+| Tailwind CSS | `tailwindcss` | — | — |
+| JSON | `jsonls` | ✅ | `prettier` |
+| YAML | `yamlls` | ✅ | `prettier` |
+| Markdown | `marksman` | ✅ | `prettier` |
+| Bash / Shell | `bashls` | ✅ | `shfmt` |
+| GraphQL | — | — | `prettier` |
+| Vim / Vimdoc | — | ✅ | — |
 
-### ☕ Java & Spring Boot
-- **nvim-jdtls**: Enhanced Java development experience
-  - `<leader>jo`: Organize imports
-  - `<leader>jv`: Extract variable
-  - `<leader>jc`: Extract constant
-  - `<leader>jm`: Extract method (Visual mode)
-- **spring-boot-ls**: Spring Boot specific features (auto-completion for properties, beans, etc.)
-- **nvim-dap**: Debugging support for Java/Spring
-  - `<leader>db`: Toggle breakpoint
-  - `<leader>dc`: Start/Continue debugging
-  - `<leader>di`: Step into
-  - `<leader>do`: Step over
-  - `<leader>dt`: Terminate debugging
+---
 
-### 🛠️ Development Tools
-- **conform.nvim**: Auto-formatting
-  - `<leader>f`: Format buffer (also happens on save)
-- **persistence.nvim**: Session management
-  - `<leader>qs`: Restore session for current directory
-  - `<leader>ql`: Restore last session
-  - `<leader>qd`: Stop persistence (don't save session)
-- **trouble.nvim**: Better diagnostics display
-- **undotree**: Visual undo history
-- **vim-fugitive**: Git integration
+## ✂️ Completion Sources
 
-### 🧰 Utilities
-- **harpoon**: Quick file navigation
-  - `<leader>a`: Add file to harpoon
-  - `<C-e>`: Toggle quick menu
-  - `<C-h/j/k/l>`: Navigate to harpoon files
-- **Comment.nvim**: Easy code commenting
-- **nvim-autopairs**: Auto-close brackets
-- **zen-mode.nvim**: Distraction-free coding
+| Mode | Source | What it provides |
+|---|---|---|
+| Insert | `nvim_lsp` | Symbols, types, imports from language server |
+| Insert | `luasnip` | Code snippet expansion |
+| Insert | `buffer` | Words already in open buffers |
+| Insert | `path` | Filesystem path completion |
+| `/` `?` search | `buffer` | Buffer words while searching |
+| `:` command | `cmdline` | Ex commands and subcommands |
+| `:` command | `path` | File paths in command arguments |
 
-### 🔐 Security
-- **cloak.nvim**: Hide sensitive data in certain files
-  - Automatically hides values in .env files
+### Completion Keymaps
+
+| Key | Action |
+|---|---|
+| `<C-n>` | Next suggestion |
+| `<C-p>` | Previous suggestion |
+| `<C-y>` | Confirm selection |
+| `<C-i>` | Manually trigger menu |
+| `<C-s>e` | Expand snippet |
+| `<C-s>;` | Jump to next snippet field |
+| `<C-s>,` | Jump to previous snippet field |
+| `<C-E>` | Cycle snippet choice |
+
+---
 
 ## ⌨️ Key Mappings
 
+> `<leader>` = `<Space>`
+
 ### General
-- `<leader>` is mapped to `<Space>`
-- `<leader>e`: Open file explorer
-- `<leader>f`: Format buffer
-- `<C-d>/<C-u>`: Scroll half page with centered cursor
-- `<leader>s`: Search and replace current word
-- `<leader>x`: Make current file executable
+| Key | Action |
+|---|---|
+| `<leader>e` | Open file explorer (netrw) |
+| `<leader>f` | Format buffer |
+| `<leader>s` | Search & replace word under cursor |
+| `<leader>x` | `chmod +x` current file *(Unix only)* |
+| `<C-d>` / `<C-u>` | Scroll half-page, cursor centred |
+| `<C-f>` | New tmux window with sessionizer *(Unix only)* |
+| `<leader>vpp` | Open lazy_init.lua config |
+| `<leader><leader>` | Source current file |
+| `<leader>ee` | Insert Go error handling snippet |
 
 ### LSP
-- `gd`: Go to definition
-- `K`: Hover information
-- `<leader>vws`: Workspace symbol search
-- `<leader>vd`: Open diagnostic float
-- `<leader>vca`: Code action
-- `<leader>vrr`: References
-- `<leader>vrn`: Rename
-- `<C-h>`: Signature help
-- `[d/]d`: Navigate diagnostics
+| Key | Action |
+|---|---|
+| `gd` | Go to definition |
+| `K` | Hover documentation |
+| `<leader>vws` | Workspace symbol search |
+| `<leader>vd` | Open diagnostic float |
+| `<leader>vca` | Code action |
+| `<leader>vrr` | References |
+| `<leader>vrn` | Rename symbol |
+| `<C-h>` | Signature help (insert mode) |
+| `[d` / `]d` | Navigate diagnostics |
+
+### Telescope
+| Key | Action |
+|---|---|
+| `<leader>ff` | Find files |
+| `<C-p>` | Git files |
+| `<leader>fs` | Grep search (prompt) |
+| `<leader>pws` | Grep word under cursor |
+| `<leader>pWs` | Grep WORD under cursor |
+| `<leader>vh` | Help tags |
+
+### Harpoon
+| Key | Action |
+|---|---|
+| `<leader>a` | Add file to harpoon |
+| `<C-e>` | Toggle harpoon quick menu |
+| `<C-h>` | Jump to file 1 |
+| `<C-j>` | Jump to file 2 |
+| `<C-k>` | Jump to file 3 |
+| `<C-l>` | Jump to file 4 |
+
+### Git (Fugitive)
+| Key | Action |
+|---|---|
+| `<leader>gs` | Git status |
+| `<leader>p` | Git push *(in fugitive buffer)* |
+| `<leader>P` | Git pull --rebase *(in fugitive buffer)* |
+| `gu` / `gh` | Accept diff from left / right |
+
+### Trouble
+| Key | Action |
+|---|---|
+| `<leader>tt` | Toggle diagnostics list |
+| `<leader>tT` | Toggle buffer diagnostics |
+| `[t` / `]t` | Navigate trouble items |
+
+### Quickfix / Loclist
+| Key | Action |
+|---|---|
+| `<leader>cn` | Next quickfix item |
+| `<leader>cp` | Previous quickfix item |
+| `<leader>k` | Next loclist item |
+| `<leader>j` | Previous loclist item |
+
+### Refactoring *(visual mode)*
+| Key | Action |
+|---|---|
+| `<leader>ri` | Inline variable |
+| `<leader>re` | Extract variable |
+| `<leader>rr` | Extract function |
+
+### Clipboard
+| Key | Action |
+|---|---|
+| `<leader>y` | Yank to system clipboard |
+| `<leader>Y` | Yank line to system clipboard |
+| `<leader>d` | Delete to void register |
+| `<leader>p` | Paste without overwriting register |
+
+### Misc
+| Key | Action |
+|---|---|
+| `<leader>u` | Toggle undotree |
+| `Q` | Disabled (no-op) |
+| `<C-c>` | Escape (insert mode alias) |
+
+---
 
 ## 📁 File Structure
+
 ```
-nvim/
-├── init.lua                 # Entry point
-├── lua/
-│   └── theprimeagen/       # Configuration directory
-│       ├── init.lua        # Main config file
-│       ├── lazy_init.lua    # Lazy.nvim setup & performance tuning
-│       └── lazy/            # Plugin-specific configurations
+~/.config/nvim/
+├── init.lua                        # Entry point
+├── lazy-lock.json                  # Plugin version lock
+└── lua/
+    └── theprimeagen/
+        ├── init.lua                # Autocommands, LspAttach, filetype config
+        ├── lazy_init.lua           # lazy.nvim bootstrap & performance settings
+        ├── remap.lua               # Global keymaps
+        ├── set.lua                 # Vim options
+        └── lazy/                   # Per-plugin configs
+            ├── colors.lua          # rose-pine theme
+            ├── formatting.lua      # conform.nvim
+            ├── fugitive.lua        # vim-fugitive
+            ├── harpoon.lua         # harpoon2
+            ├── init.lua            # refactoring.nvim
+            ├── local.lua           # nvim-autopairs, Comment.nvim
+            ├── lsp.lua             # LSP, mason, nvim-cmp, LuaSnip
+            ├── lualine.lua         # statusline
+            ├── telescope.lua       # fuzzy finder
+            ├── treesitter.lua      # syntax / parsing
+            ├── trouble.lua         # diagnostics UI
+            └── undotree.lua        # undo history
 ```
+
+---
+
+## 🖥️ Windows Compatibility
+
+All plugins work on Windows. Two keymaps are Unix-only and automatically
+disabled on Windows:
+- `<C-f>` (tmux sessionizer)
+- `<leader>x` (chmod)
+
+**Extra steps on Windows:**
+1. Install `tree-sitter` CLI: `npm install -g tree-sitter-cli`
+2. Install a C compiler (LLVM/clang recommended): `winget install LLVM.LLVM`
+3. Install `fd` and `ripgrep` for Telescope: `winget install BurntSushi.ripgrep.MSVC sharkdp.fd`
+
+---
+
+## 🔧 Requirements
+
+| Tool | Purpose |
+|---|---|
+| Neovim 0.11+ | Required (tested on 0.12.1) |
+| `git` | lazy.nvim plugin cloning |
+| `tree-sitter` CLI | nvim-treesitter parser compilation |
+| `gcc` or `clang` | Parser compilation backend |
+| `node` + `npm` | Many Mason LSP servers |
+| `fd` | Telescope file finding |
+| `ripgrep` | Telescope live grep |

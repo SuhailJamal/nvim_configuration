@@ -10,53 +10,104 @@ return {
         "hrsh7th/nvim-cmp",
         {
             "L3MON4D3/LuaSnip",
-            -- Remove build step that causes issues on Windows
             build = nil,
             version = "v2.*",
         },
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
         "rafamadriz/friendly-snippets",
-        "hrsh7th/cmp-nvim-lua",
     },
 
     config = function()
+        -- ── LuaSnip ──────────────────────────────────────────────────────────
         local ls = require("luasnip")
         ls.filetype_extend("javascript", { "jsdoc" })
 
-        vim.keymap.set({"i"}, "<C-s>e", function() ls.expand() end, {silent = true})
-        vim.keymap.set({"i", "s"}, "<C-s>;", function() ls.jump(1) end, {silent = true})
-        vim.keymap.set({"i", "s"}, "<C-s>,", function() ls.jump(-1) end, {silent = true})
-        vim.keymap.set({"i", "s"}, "<C-E>", function()
+        vim.keymap.set({ "i" }, "<C-s>e", function() ls.expand() end, { silent = true })
+        vim.keymap.set({ "i", "s" }, "<C-s>;", function() ls.jump(1) end, { silent = true })
+        vim.keymap.set({ "i", "s" }, "<C-s>,", function() ls.jump(-1) end, { silent = true })
+        vim.keymap.set({ "i", "s" }, "<C-E>", function()
             if ls.choice_active() then
                 ls.change_choice(1)
             end
-        end, {silent = true})
+        end, { silent = true })
 
         require("luasnip.loaders.from_vscode").lazy_load()
-        local cmp = require('cmp')
+
+        -- ── Capabilities (shared across all servers) ──────────────────────────
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(
             "force",
             {},
             vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities())
+            cmp_lsp.default_capabilities()
+        )
 
-        -- LSP Keymaps
-        vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, { desc = "Go to definition" })
-        vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, { desc = "Show hover information" })
-        vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, { desc = "Search workspace symbols" })
-        vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, { desc = "Show diagnostics" })
-        vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, { desc = "Go to next diagnostic" })
-        vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, { desc = "Go to previous diagnostic" })
-        vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, { desc = "Show code actions" })
-        vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, { desc = "Show references" })
-        vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, { desc = "Rename symbol" })
-        vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, { desc = "Show signature help" })
+        -- ── Server configurations (mason-lspconfig v2: use vim.lsp.config) ───
+        --
+        -- vim.lsp.config sets defaults for a server; mason-lspconfig v2 will
+        -- automatically call vim.lsp.enable() for every installed server.
 
-        -- Configure diagnostics display
+        -- Default capabilities for all servers not explicitly configured below
+        vim.lsp.config("*", { capabilities = capabilities })
+
+        -- lua_ls: recognise vim globals
+        vim.lsp.config("lua_ls", {
+            capabilities = capabilities,
+            settings = {
+                Lua = {
+                    diagnostics = {
+                        globals = { "vim", "it", "describe", "before_each", "after_each" },
+                    },
+                },
+            },
+        })
+
+        -- rust_analyzer: use clippy for richer lints
+        vim.lsp.config("rust_analyzer", {
+            capabilities = capabilities,
+            settings = {
+                ["rust-analyzer"] = {
+                    check = { command = "clippy" },
+                },
+            },
+        })
+
+        -- yamlls: enable schema store for auto-detection
+        vim.lsp.config("yamlls", {
+            capabilities = capabilities,
+            settings = {
+                yaml = {
+                    schemaStore = { enable = true, url = "" },
+                },
+            },
+        })
+
+        -- ── Mason + mason-lspconfig v2 ────────────────────────────────────────
+        require("fidget").setup({})
+        require("mason").setup()
+        require("mason-lspconfig").setup({
+            ensure_installed = {
+                "lua_ls",
+                "ts_ls",
+                "clangd",
+                "pyright",
+                "html",
+                "cssls",
+                "jsonls",
+                "tailwindcss",
+                "rust_analyzer",
+                "bashls",
+                "yamlls",
+                "marksman",
+            },
+            -- automatic_enable = true is the default in v2; it calls
+            -- vim.lsp.enable() for every installed server automatically.
+        })
+
+        -- ── Diagnostics ───────────────────────────────────────────────────────
         vim.diagnostic.config({
-            virtual_text = false, -- Disable virtual text by default for performance and less noise
+            virtual_text = true,
             signs = {
                 text = {
                     [vim.diagnostic.severity.ERROR] = " ",
@@ -65,9 +116,9 @@ return {
                     [vim.diagnostic.severity.INFO] = " ",
                 },
             },
-            update_in_insert = false, -- Don't update diagnostics in insert mode
-            underline = true, -- Underline errors
-            severity_sort = true, -- Sort diagnostics by severity
+            update_in_insert = false,
+            underline = true,
+            severity_sort = true,
             float = {
                 focusable = false,
                 style = "minimal",
@@ -85,78 +136,51 @@ return {
             },
         })
 
-        require("fidget").setup({})
-        require("mason").setup()
-        require("mason-lspconfig").setup({
-            ensure_installed = {
-                "lua_ls",
-                "ts_ls",
-                "clangd",
-                "pyright",
-                "html",
-                "cssls",
-                "jsonls",
-                "tailwindcss",
-            },
-            handlers = {
-                function(server_name) -- default handler (optional)
-                    if server_name == "jdtls" then
-                        return
-                    end
-                    require("lspconfig")[server_name].setup {
-                        capabilities = capabilities
-                    }
-                end,
-
-                ["lua_ls"] = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.lua_ls.setup {
-                        capabilities = capabilities,
-                        settings = {
-                            Lua = {
-                                diagnostics = {
-                                    globals = { "vim", "it", "describe", "before_each", "after_each" },
-                                }
-                            }
-                        }
-                    }
-                end,
-            }
-        })
-
+        -- ── nvim-cmp ──────────────────────────────────────────────────────────
+        local cmp = require("cmp")
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
         cmp.setup({
             snippet = {
                 expand = function(args)
-                    require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+                    require("luasnip").lsp_expand(args.body)
                 end,
             },
             mapping = cmp.mapping.preset.insert({
-                ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
+                ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
+                ["<C-y>"] = cmp.mapping.confirm({ select = true }),
                 ["<C-i>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
-                { name = 'nvim_lsp' },
-                { name = 'nvim_lua' },
-                { name = 'luasnip' }, -- For luasnip users.
+                { name = "nvim_lsp" },
+                { name = "luasnip" },
             }, {
-                { name = 'buffer' },
-            })
+                { name = "buffer" },
+                { name = "path" },
+            }),
         })
 
-        vim.diagnostic.config({
-            -- update_in_insert = true,
-            float = {
-                focusable = false,
-                style = "minimal",
-                border = "rounded",
-                source = "always",
-                header = "",
-                prefix = "",
+        -- ── cmdline completions ───────────────────────────────────────────────
+
+        -- `/` and `?` search: complete from buffer words
+        cmp.setup.cmdline({ "/", "?" }, {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = {
+                { name = "buffer" },
             },
         })
-    end
+
+        -- `:` command mode: complete paths and Ex commands
+        cmp.setup.cmdline(":", {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = cmp.config.sources({
+                { name = "path" },
+            }, {
+                { name = "cmdline" },
+            }),
+            -- Don't complete built-in commands that don't make sense in a menu
+            matching = { disallow_symbol_nonprefix_matching = false },
+        })
+    end,
 }

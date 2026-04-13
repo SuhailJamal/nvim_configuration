@@ -1,23 +1,36 @@
 return {
     {
         "folke/trouble.nvim",
-        config = function()
-            require("trouble").setup({
-                icons = false,
-            })
-
-            vim.keymap.set("n", "<leader>tt", function()
-                require("trouble").toggle()
-            end)
-
-            vim.keymap.set("n", "[t", function()
-                require("trouble").next({skip_groups = true, jump = true});
-            end)
-
-            vim.keymap.set("n", "]t", function()
-                require("trouble").previous({skip_groups = true, jump = true});
-            end)
-
-        end
+        cmd = { "Trouble" },
+        keys = {
+            {
+                "<leader>tt",
+                "<cmd>Trouble diagnostics toggle<CR>",
+                desc = "Diagnostics (Trouble)",
+            },
+            {
+                "<leader>tT",
+                "<cmd>Trouble diagnostics toggle filter.buf=0<CR>",
+                desc = "Buffer diagnostics (Trouble)",
+            },
+            {
+                "[t",
+                function()
+                    require("trouble").prev({ skip_groups = true, jump = true })
+                end,
+                desc = "Previous trouble item",
+            },
+            {
+                "]t",
+                function()
+                    require("trouble").next({ skip_groups = true, jump = true })
+                end,
+                desc = "Next trouble item",
+            },
+        },
+        opts = {
+            icons = false,
+            -- v3 defaults are sane; only override what you need
+        },
     },
 }
